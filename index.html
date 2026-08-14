@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Portal responsivo para acompanhamento de entregas e confirmação de endereço por CEP." />
+  <meta name="theme-color" content="#ffd400" />
+  <title>Rastreio de Encomenda</title>
+  <link rel="icon" type="image/png" href="assets/correios-logo.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="demo-banner" role="note">
+    <span>RASTREAMENTO DE ENTREGA</span>
+    <button id="aboutDemoBtn" type="button" aria-label="Sobre este portal">?</button>
+  </div>
+
+  <header class="site-header">
+    <div class="topbar shell">
+      <button class="menu-button" id="menuButton" type="button" aria-expanded="false" aria-controls="mobileMenu" aria-label="Abrir menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <a class="brand" href="#inicio" aria-label="Início">
+        <img class="brand-logo" src="assets/correios-logo.png" alt="" aria-hidden="true" />
+        <span class="brand-copy"><strong>Rastreio Brasil</strong><small>acompanhamento de entregas</small></span>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Navegação principal">
+        <button class="nav-link is-active" data-section="rastrear" type="button">Rastrear</button>
+        <button class="nav-link" data-section="enviar" type="button">Enviar</button>
+        <button class="nav-link" data-section="receber" type="button">Receber</button>
+        <button class="nav-link" data-section="atendimento" type="button">Atendimento</button>
+      </nav>
+
+      <button class="header-action" id="helpButton" type="button" aria-label="Abrir ajuda">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20Zm0-5.1v.1m-2.1-8.2a2.4 2.4 0 1 1 3.7 2c-1 .6-1.6 1.2-1.6 2.5"/></svg>
+        <span>Ajuda</span>
+      </button>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <div class="shell mobile-menu-inner">
+        <button class="mobile-nav-link is-active" data-section="rastrear" type="button">Rastrear objeto</button>
+        <button class="mobile-nav-link" data-section="enviar" type="button">Enviar encomenda</button>
+        <button class="mobile-nav-link" data-section="receber" type="button">Receber encomenda</button>
+        <button class="mobile-nav-link" data-section="atendimento" type="button">Atendimento</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="inicio">
+    <section class="hero" id="rastrear">
+      <div class="shell hero-inner">
+        <div class="hero-copy">
+          <span class="eyebrow">ACOMPANHE SUA ENCOMENDA</span>
+          <h1>Rastreamento de objetos</h1>
+          <p>Consulte o andamento da entrega com seu código de rastreamento.</p>
+        </div>
+
+        <form class="tracking-search" id="trackingForm" novalidate>
+          <label for="trackingInput">Código de rastreio</label>
+          <div class="search-row">
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h13A2.5 2.5 0 0 1 21 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 18.5v-13Zm4 3h10M7 12h7M7 15.5h5"/></svg>
+              <input id="trackingInput" name="codigo" inputmode="text" autocomplete="off" maxlength="20" placeholder="Ex.: BR123456789XX" />
+              <button class="clear-input" id="clearInputBtn" type="button" aria-label="Limpar código" hidden>×</button>
+            </div>
+            <button class="primary-button" type="submit">Consultar</button>
+          </div>
+          <p class="field-message" id="fieldMessage" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+
+    <section class="content shell" id="resultArea" aria-live="polite">
+      <div class="breadcrumbs" aria-label="Navegação estrutural"><a href="#inicio">Início</a><span>/</span><span>Rastreamento</span></div>
+
+      <div class="layout-grid">
+        <article class="tracking-panel" id="trackingPanel">
+          <div class="panel-head">
+            <div>
+              <span class="service-chip" id="serviceName">ENTREGA PADRÃO</span>
+              <h2 id="trackingCode">BR123456789XX</h2>
+              <p>Previsão de entrega: <strong id="expectedDate">18/08/2026</strong></p>
+            </div>
+            <div class="panel-actions">
+              <button class="icon-button" id="copyButton" type="button" aria-label="Copiar código" title="Copiar código">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"/><path d="M16 7V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2"/></svg>
+              </button>
+              <button class="icon-button" id="shareButton" type="button" aria-label="Compartilhar rastreio" title="Compartilhar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.6-4.5M8.2 13.2l7.6 4.5"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <section class="cep-card" aria-labelledby="cepTitle">
+            <div class="cep-card-head">
+              <div>
+                <span class="cep-kicker">ENDEREÇO DE DESTINO</span>
+                <h3 id="cepTitle">Consulte o endereço pelo CEP</h3>
+                <p>Digite o CEP para localizar rua, bairro, cidade e estado. Depois, informe o número para confirmar o destino da entrega.</p>
+              </div>
+            </div>
+
+            <form id="cepForm" novalidate>
+              <div class="cep-lookup-row">
+                <label class="cep-field">
+                  <span>CEP</span>
+                  <input id="cepInput" name="cep" inputmode="numeric" autocomplete="postal-code" maxlength="9" placeholder="00000-000" aria-describedby="cepMessage" />
+                </label>
+                <button class="cep-search-button" id="cepLookupButton" type="button">Buscar endereço</button>
+              </div>
+
+              <p class="cep-message" id="cepMessage" role="status" aria-live="polite"></p>
+
+              <div class="address-result" id="addressResult" hidden>
+                <div class="address-found">
+                  <div class="address-found-icon" aria-hidden="true">✓</div>
+                  <div>
+                    <span>Endereço encontrado</span>
+                    <strong id="addressPreview">—</strong>
+                  </div>
+                </div>
+
+                <div class="address-extra-grid">
+                  <label class="cep-field">
+                    <span>Número</span>
+                    <input id="addressNumber" inputmode="numeric" autocomplete="address-line2" maxlength="12" placeholder="Ex.: 35" />
+                  </label>
+                  <label class="cep-field">
+                    <span>Complemento <small>(opcional)</small></span>
+                    <input id="addressComplement" autocomplete="address-line2" maxlength="50" placeholder="Apto, bloco, casa..." />
+                  </label>
+                </div>
+
+                <button class="confirm-address-button" type="submit">Confirmar endereço de destino</button>
+                <p class="cep-privacy-note">O CEP não informa o número da residência. A consulta de endereço é feita pelo serviço público ViaCEP.</p>
+              </div>
+            </form>
+          </section>
+
+          <div class="destination-card">
+            <div class="destination-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-11a6 6 0 0 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2"/></svg>
+            </div>
+            <div class="destination-copy">
+              <span>Destino da entrega</span>
+              <strong id="destination">Informe um CEP para localizar o endereço</strong>
+              <p id="deliveryNotice" class="delivery-notice">Aguardando confirmação do endereço de destino.</p>
+            </div>
+          </div>
+
+          <ol class="timeline" id="timeline" aria-label="Eventos do rastreio"></ol>
+
+          <div class="save-area">
+            <button class="secondary-button" id="saveButton" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12a2 2 0 0 1 2 2v16l-8-4-8 4V5a2 2 0 0 1 2-2Z"/></svg>
+              <span>Salvar objeto</span>
+            </button>
+            <p id="savedMessage" class="saved-message" role="status" aria-live="polite"></p>
+          </div>
+        </article>
+
+        <aside class="side-column">
+          <section class="side-card">
+            <h3>Resumo da entrega</h3>
+            <dl>
+              <div><dt>Situação</dt><dd id="currentStatus">Em trânsito</dd></div>
+              <div><dt>Serviço</dt><dd id="serviceSummary">PAC</dd></div>
+              <div><dt>Última atualização</dt><dd id="lastUpdate">14/08/2026 às 10:42</dd></div>
+            </dl>
+          </section>
+
+          <section class="side-card quick-actions">
+            <h3>Ações rápidas</h3>
+            <button id="expandAllBtn" type="button"><span>Ver detalhes de todas as etapas</span><b>+</b></button>
+            <button id="scrollTopBtn" type="button"><span>Nova consulta</span><b>↗</b></button>
+            <button id="supportBtn" type="button"><span>Central de ajuda</span><b>›</b></button>
+          </section>
+        </aside>
+      </div>
+    </section>
+
+    <section class="info-section" id="enviar">
+      <div class="shell info-grid">
+        <div><span class="eyebrow">ENVIO</span><h2>Prepare uma encomenda</h2><p>Consulte opções e informações relacionadas ao envio de encomendas.</p></div>
+        <button class="outline-button demo-action" data-message="Opção indisponível neste portal.">Ver opções de envio</button>
+      </div>
+    </section>
+
+    <section class="info-section alt" id="receber">
+      <div class="shell info-grid">
+        <div><span class="eyebrow">RECEBIMENTO</span><h2>Organize suas entregas</h2><p>Consulte os objetos salvos neste navegador e acompanhe o histórico de rastreamento.</p></div>
+        <button class="outline-button" id="savedObjectsBtn">Objetos salvos</button>
+      </div>
+    </section>
+
+    <section class="info-section" id="atendimento">
+      <div class="shell info-grid">
+        <div><span class="eyebrow">ATENDIMENTO</span><h2>Precisa de ajuda?</h2><p>Veja informações sobre o funcionamento do portal de rastreamento.</p></div>
+        <button class="outline-button" id="aboutFooterBtn">Abrir ajuda</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div class="footer-brand"><img class="brand-logo footer-logo" src="assets/correios-logo.png" alt="" aria-hidden="true" /><strong>Rastreio Brasil</strong></div>
+      <p>Serviço independente de acompanhamento. Não possui vínculo com os Correios ou qualquer transportadora.</p>
+      <button id="backToTopFooter" type="button">Voltar ao topo ↑</button>
+    </div>
+  </footer>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="modalClose" type="button" aria-label="Fechar">×</button>
+      <div class="modal-icon" aria-hidden="true">i</div>
+      <h2 id="modalTitle">Sobre este portal</h2>
+      <p id="modalText">Este é um serviço independente de acompanhamento de entregas. A consulta de CEP usa o ViaCEP para localizar endereços. O portal não possui vínculo com os Correios ou qualquer transportadora.</p>
+      <button class="primary-button modal-ok" id="modalOk" type="button">Entendi</button>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
