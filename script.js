@@ -59,6 +59,7 @@ const els = {
   currentStatus: $("#currentStatus"),
   lastUpdate: $("#lastUpdate"),
   timeline: $("#timeline"),
+  statusSummary: $("#statusSummary"),
   saveButton: $("#saveButton"),
   savedMessage: $("#savedMessage"),
   copyButton: $("#copyButton"),
@@ -88,6 +89,7 @@ let toastTimer;
 let detailsExpanded = false;
 let currentCepData = null;
 let cepAbortController = null;
+let trackingStatusVisible = false;
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -150,6 +152,13 @@ function renderTracking(data) {
   });
 
   updateSavedButton();
+}
+
+function setTrackingStatusVisible(visible) {
+  trackingStatusVisible = Boolean(visible);
+  els.timeline.hidden = !trackingStatusVisible;
+  els.statusSummary.hidden = !trackingStatusVisible;
+  els.expandAllBtn.hidden = !trackingStatusVisible;
 }
 
 function showToast(message) {
@@ -242,6 +251,7 @@ function resetDestinationState() {
   els.deliveryNotice.textContent = "Aguardando confirmação do endereço de destino.";
   els.deliveryNotice.classList.remove("is-confirmed");
   renderTracking(trackingData);
+  setTrackingStatusVisible(false);
 }
 
 function updateDestinationFromCep(data, fullAddress, confirmed = false) {
@@ -263,6 +273,7 @@ function updateDestinationFromCep(data, fullAddress, confirmed = false) {
   }
 
   renderTracking(trackingData);
+  setTrackingStatusVisible(true);
 }
 
 async function lookupCep() {
@@ -272,6 +283,7 @@ async function lookupCep() {
   if (cep.length !== 8) {
     currentCepData = null;
     els.addressResult.hidden = true;
+    setTrackingStatusVisible(false);
     setCepMessage("Digite um CEP válido com 8 números.", "error");
     els.cepInput.focus();
     return;
@@ -298,6 +310,7 @@ async function lookupCep() {
     if (data.erro) {
       currentCepData = null;
       els.addressResult.hidden = true;
+      setTrackingStatusVisible(false);
       setCepMessage("CEP não encontrado. Confira os números e tente novamente.", "error");
       return;
     }
@@ -524,4 +537,5 @@ if (initialCode) {
 }
 
 renderTracking(trackingData);
+setTrackingStatusVisible(false);
 restoreConfirmedAddress();

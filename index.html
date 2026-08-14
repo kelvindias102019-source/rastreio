@@ -151,7 +151,7 @@
             </div>
           </div>
 
-          <ol class="timeline" id="timeline" aria-label="Eventos do rastreio"></ol>
+          <ol class="timeline" id="timeline" aria-label="Eventos do rastreio" hidden></ol>
 
           <div class="save-area">
             <button class="secondary-button" id="saveButton" type="button">
@@ -163,7 +163,7 @@
         </article>
 
         <aside class="side-column">
-          <section class="side-card">
+          <section class="side-card" id="statusSummary" hidden>
             <h3>Resumo da entrega</h3>
             <dl>
               <div><dt>Situação</dt><dd id="currentStatus">Em trânsito</dd></div>
@@ -174,7 +174,7 @@
 
           <section class="side-card quick-actions">
             <h3>Ações rápidas</h3>
-            <button id="expandAllBtn" type="button"><span>Ver detalhes de todas as etapas</span><b>+</b></button>
+            <button id="expandAllBtn" type="button" hidden><span>Ver detalhes de todas as etapas</span><b>+</b></button>
             <button id="scrollTopBtn" type="button"><span>Nova consulta</span><b>↗</b></button>
             <button id="supportBtn" type="button"><span>Central de ajuda</span><b>›</b></button>
           </section>
