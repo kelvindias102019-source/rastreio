@@ -4,7 +4,7 @@
 // A consulta de CEP usa o ViaCEP apenas para preencher o destino.
 // ============================================================
 const trackingData = {
-  trackingCode: "BR123456789XX",
+  trackingCode: "",
   serviceName: "ENTREGA PADRÃO",
   serviceShort: "PAC",
   expectedDate: "—",
@@ -102,6 +102,52 @@ function escapeHtml(value) {
 
 function formatCode(value) {
   return value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20);
+}
+
+// ============================================================
+// CÓDIGO ÚNICO POR VISITANTE/NAVEGADOR
+// - Gera um código no padrão de 2 letras + 9 números + BR.
+// - Salva no localStorage para não mudar ao atualizar ou voltar ao site.
+// - Não coleta IP nem depende de API externa.
+// ============================================================
+const VISITOR_TRACKING_KEY = "visitorTrackingCode";
+
+function isGeneratedTrackingCode(value) {
+  return /^[A-Z]{2}\d{9}BR$/.test(formatCode(value));
+}
+
+function randomLetter() {
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  return alphabet[Math.floor(Math.random() * alphabet.length)];
+}
+
+function randomDigit() {
+  return Math.floor(Math.random() * 10);
+}
+
+function generateVisitorTrackingCode() {
+  const letters = `${randomLetter()}${randomLetter()}`;
+  let digits = "";
+
+  for (let i = 0; i < 9; i += 1) {
+    digits += randomDigit();
+  }
+
+  return `${letters}${digits}BR`;
+}
+
+function getOrCreateVisitorTrackingCode() {
+  try {
+    const stored = formatCode(localStorage.getItem(VISITOR_TRACKING_KEY) || "");
+    if (isGeneratedTrackingCode(stored)) return stored;
+
+    const generated = generateVisitorTrackingCode();
+    localStorage.setItem(VISITOR_TRACKING_KEY, generated);
+    return generated;
+  } catch {
+    // Se o navegador bloquear armazenamento local, ainda gera um código para a sessão atual.
+    return generateVisitorTrackingCode();
+  }
 }
 
 function onlyDigits(value) {
@@ -591,15 +637,18 @@ const sectionObserver = new IntersectionObserver((entries) => {
 }, { rootMargin: "-25% 0px -55% 0px", threshold: [0, .15, .4] });
 ["rastrear", "enviar", "receber", "atendimento"].forEach((id) => sectionObserver.observe(document.getElementById(id)));
 
-// Permite abrir o site já com ?codigo=BR123456789XX.
-const params = new URLSearchParams(location.search);
-const initialCode = formatCode(params.get("codigo") || "");
-if (initialCode) {
-  els.trackingInput.value = initialCode;
-  els.clearInputBtn.hidden = false;
-}
+// Define um código exclusivo para este navegador e já deixa o campo preenchido.
+trackingData.trackingCode = getOrCreateVisitorTrackingCode();
 
-updateDynamicTrackingDates(initialCode);
+// Se a URL trouxer ?codigo=..., mantém a possibilidade de abrir um código específico.
+// Sem parâmetro, o código exclusivo do visitante é usado automaticamente.
+const params = new URLSearchParams(location.search);
+const urlCode = formatCode(params.get("codigo") || "");
+const initialCode = urlCode || trackingData.trackingCode;
+els.trackingInput.value = initialCode;
+els.clearInputBtn.hidden = !initialCode;
+
+updateDynamicTrackingDates("");
 renderTracking(trackingData);
 setTrackingStatusVisible(false);
 restoreConfirmedAddress();
