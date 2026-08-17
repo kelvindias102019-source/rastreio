@@ -1,13 +1,13 @@
 // ============================================================
 // DADOS DO RASTREIO
-// Edite este bloco para trocar código, serviço, datas e etapas.
+// Edite este bloco para trocar código, serviço e etapas. As datas são calculadas automaticamente.
 // A consulta de CEP usa o ViaCEP apenas para preencher o destino.
 // ============================================================
 const trackingData = {
   trackingCode: "BR123456789XX",
   serviceName: "ENTREGA PADRÃO",
   serviceShort: "PAC",
-  expectedDate: "18/08/2026",
+  expectedDate: "—",
   destination: "Informe um CEP para localizar o endereço",
   currentStatus: "Em trânsito",
   events: [
@@ -15,21 +15,21 @@ const trackingData = {
       type: "truck",
       title: "Objeto em trânsito — por favor aguarde",
       location: "de Unidade de Tratamento em ORIGEM/UF para Unidade de Distribuição em CIDADE/UF",
-      date: "14/08/2026 10:42",
+      date: "—",
       details: "O objeto segue em deslocamento para a região de destino."
     },
     {
       type: "box",
       title: "Objeto chegou à unidade de tratamento",
       location: "UNIDADE DE TRATAMENTO/UF",
-      date: "13/08/2026 19:18",
+      date: "—",
       details: "O objeto foi recebido pela unidade responsável pela próxima etapa logística."
     },
     {
       type: "posted",
       title: "Objeto postado",
       location: "AGÊNCIA DE ORIGEM/UF",
-      date: "13/08/2026 12:05",
+      date: "—",
       details: "Registro inicial de postagem do objeto."
     }
   ]
@@ -111,6 +111,67 @@ function onlyDigits(value) {
 function formatCep(value) {
   const digits = onlyDigits(value).slice(0, 8);
   return digits.length > 5 ? `${digits.slice(0, 5)}-${digits.slice(5)}` : digits;
+}
+
+
+// ============================================================
+// DATAS DINÂMICAS DO RASTREIO
+// - Previsão de entrega: sempre amanhã.
+// - Evento mais recente: hoje.
+// - Postagem: 1 ou 2 dias antes, de forma estável para o CEP.
+// ============================================================
+function startOfLocalDay(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function addDays(date, amount) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + amount);
+  return result;
+}
+
+function formatDateBr(date) {
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(date);
+}
+
+function formatDateTimeBr(date, time) {
+  return `${formatDateBr(date)} ${time}`;
+}
+
+function getPostingOffset(cep = "") {
+  const digits = onlyDigits(cep);
+  if (!digits) return 2;
+
+  // Mantém o resultado consistente para o mesmo CEP no mesmo fluxo:
+  // CEP terminado em número par -> 2 dias antes; ímpar -> 1 dia antes.
+  const lastDigit = Number(digits.at(-1));
+  return Number.isFinite(lastDigit) && lastDigit % 2 === 0 ? 2 : 1;
+}
+
+function updateDynamicTrackingDates(cep = "") {
+  const today = startOfLocalDay();
+  const tomorrow = addDays(today, 1);
+  const postingOffset = getPostingOffset(cep);
+  const postedDay = addDays(today, -postingOffset);
+
+  trackingData.expectedDate = formatDateBr(tomorrow);
+
+  // A movimentação mais recente sempre acompanha o dia da consulta.
+  trackingData.events[0].date = formatDateTimeBr(today, "10:42");
+
+  if (postingOffset === 2) {
+    trackingData.events[1].date = formatDateTimeBr(addDays(today, -1), "19:18");
+    trackingData.events[2].date = formatDateTimeBr(postedDay, "12:05");
+  } else {
+    // Quando a postagem é de ontem, a chegada à unidade fica registrada hoje,
+    // antes da movimentação mais recente, mantendo a ordem cronológica.
+    trackingData.events[1].date = formatDateTimeBr(today, "08:18");
+    trackingData.events[2].date = formatDateTimeBr(postedDay, "12:05");
+  }
 }
 
 function renderTracking(data) {
@@ -243,6 +304,7 @@ function buildFullAddress(data, number, complement) {
 }
 
 function resetDestinationState() {
+  updateDynamicTrackingDates(els.cepInput.value);
   trackingData.destination = "Informe um CEP para localizar o endereço";
   trackingData.currentStatus = "Em trânsito";
   trackingData.events[0].title = "Objeto em trânsito — por favor aguarde";
@@ -255,6 +317,7 @@ function resetDestinationState() {
 }
 
 function updateDestinationFromCep(data, fullAddress, confirmed = false) {
+  updateDynamicTrackingDates(data.cep || els.cepInput.value);
   trackingData.destination = fullAddress;
 
   if (data.localidade && data.uf) {
@@ -536,6 +599,7 @@ if (initialCode) {
   els.clearInputBtn.hidden = false;
 }
 
+updateDynamicTrackingDates(initialCode);
 renderTracking(trackingData);
 setTrackingStatusVisible(false);
 restoreConfirmedAddress();
